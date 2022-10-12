@@ -1,0 +1,34 @@
+version: "3.9"
+
+services:
+  db:
+    image: postgres
+    volumes:
+      - ./data/db:/var/lib/postgresql/data
+    environment:
+      - POSTGRES_DB=postgres
+      - POSTGRES_USER=postgres
+      - POSTGRES_PASSWORD=postgres
+  web:
+    build: .
+    command: production
+    volumes:
+      - .:/app
+    ports:
+      - "8000:8000"
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+    depends_on:
+      - db
+      - web_migrations
+    entrypoint: /docker-entrypoint.sh
+  web_migrations:
+    build: .
+    command: migrate
+    volumes:
+      - .:/app
+    environment:
+      - DATABASE_URL=postgres://postgres:postgres@db:5432/postgres
+    depends_on:
+      - db
+    entrypoint: /docker-entrypoint.sh
