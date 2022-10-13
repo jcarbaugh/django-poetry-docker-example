@@ -16,14 +16,10 @@ RUN groupadd --system ${APP_USER} && \
 #
 FROM python-base AS python-build
 
-ARG APP_PATH
-
 ARG BUILD_DEPS="build-essential libpq-dev"
 RUN apt-get update && \
     apt-get install --no-install-recommends -y $BUILD_DEPS && \
     rm -rf /var/lib/apt/lists/*
-
-WORKDIR ${APP_PATH}
 
 COPY poetry.lock pyproject.toml .
 RUN pip install poetry && \
@@ -43,11 +39,10 @@ RUN apt-get update && \
     apt-get install --no-install-recommends -y $RUN_DEPS && \
     rm -rf /var/lib/apt/lists/*
 
-WORKDIR ${APP_PATH}
-
 COPY ./docker-entrypoint.sh /docker-entrypoint.sh
 RUN chmod +x /docker-entrypoint.sh
 
+WORKDIR ${APP_PATH}
 RUN chown -R ${APP_USER}:${APP_USER} ${APP_PATH}
 
 USER $APP_USER:$APP_USER
